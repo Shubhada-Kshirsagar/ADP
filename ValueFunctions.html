@@ -1,0 +1,292 @@
+<html>
+<head>
+<title>Value Functions</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<script src="http://numericjs.com/numeric/lib/numeric-1.2.6.js">
+</script>
+<script>
+
+function Compute(form) {
+  var V1_low, V1_high, V2_low, V2_high;
+  l1 = parseFloat(form.low1.value);
+  b1 = parseFloat(form.high1.value);
+  l2 = parseFloat(form.low2.value);
+  b2 = parseFloat(form.high2.value);
+  l3 = parseFloat(form.low3.value);
+  b3 = parseFloat(form.high3.value);
+  
+  
+  V1_low = V1(l1);
+  V1_high = V1(b1);
+  V2_low = parseFloat(l2/10);
+  V2_high = parseFloat(b2/10);
+  V3_low = V3(l3);
+  V3_high = V3(b3);
+  
+  
+  var x;
+x  = numeric.solveLP([1,1],                   /* minimize [1,1]*x                */
+                        [[-1,0],[0,-1],[-1,-2]], /* matrix of inequalities          */
+                        [0,0,-3]                 /* right-hand-side of inequalities */
+                        );      
+  numeric.trunc(x.solution,1e-12);
+  
+  var x1,x2;
+  x1 = parseFloat(x.solution[0].toFixed(2));
+  x2 = parseFloat(x.solution[1].toFixed(2));
+  
+  form.V1_low.value = V1_low;
+  form.V1_high.value = V1_high;
+	form.V2_low.value = V2_low;
+	form.V2_high.value = V2_high;   
+	form.V3_low.value = V3_low;
+	form.V3_high.value = V3_high;   
+	
+	
+	//preferences
+	var lamda1, lamda2;
+	
+	//declare from the form
+	V1_ind_left_1 = parseFloat(form.V1_ind_left_1.value);
+	V1_ind_right_1 = parseFloat(form.V1_ind_right_1.value);
+	V2_ind_left_1 = parseFloat(form.V2_ind_left_1.value);
+	V2_ind_right_1 = parseFloat(form.V2_ind_right_1.value);
+	V3_ind_left_1 = parseFloat(form.V3_ind_left_1.value);
+	V3_ind_right_1 = parseFloat(form.V3_ind_right_1.value);
+	
+	V1_ind_left_2 = parseFloat(form.V1_ind_left_2.value);
+	V1_ind_right_2 = parseFloat(form.V1_ind_right_2.value);
+	V2_ind_left_2 = parseFloat(form.V2_ind_left_1.value);
+	V2_ind_right_2 = parseFloat(form.V2_ind_right_1.value);
+	V3_ind_left_2 = parseFloat(form.V3_ind_left_1.value);
+	V3_ind_right_2 = parseFloat(form.V3_ind_right_1.value);
+	
+	
+	
+	V1_ind_left_1 = check(V1_ind_left_1,1);
+	V1_ind_right_1 = check(V1_ind_right_1,1);
+	V2_ind_left_2 = check(V2_ind_left_2,2);
+	V2_ind_right_2 = check(V2_ind_right_2,2);
+	V3_ind_left_2 = check(V3_ind_left_2,3);
+	V3_ind_right_2 = check(V3_ind_right_2,3);
+	
+	alert(V1_ind_left_1);
+	alert(V1_ind_right_1);
+	alert(V2_ind_left_2);
+	alert(V2_ind_right_2);
+	alert(V3_ind_left_2);
+	alert(V3_ind_right_2);
+	
+	V1_ind_left_2 = check(V1_ind_left_2,1);
+	V1_ind_right_2 = check(V1_ind_right_2,1);
+	V2_ind_left_2 = check(V2_ind_left_2,2);
+	V2_ind_right_2 = check(V2_ind_right_2,2);
+	V3_ind_left_2 = check(V3_ind_left_2,3);
+	V3_ind_right_2 = check(V3_ind_right_2,3);
+	
+	var eq1 = lamda1 * (V1_ind_left_1 -V1_ind_left_1)+ lamda2 * (V2_ind_left_1 -V2_ind_right_1)
+		
+	var y  = numeric.solveLP([1,1,1],                   /* minimize [1,1]*x                */
+                        [[(V1_ind_left_1 -V1_ind_right_1),(V2_ind_left_1 -V2_ind_right_1),(V3_ind_left_1 -V3_ind_right_1)],[(V1_ind_left_2 -V1_ind_right_2),(V2_ind_left_2 -V2_ind_right_2),(V3_ind_left_2 -V3_ind_right_2)],[1,1,1]], /* matrix of inequalities          */
+                        [0,0,1]                 /* right-hand-side of inequalities */
+                        );   
+alert(y.solution);						
+  numeric.trunc(y.solution,1e-12);
+ alert(y); 
+  var y1,y2,y3;
+  y1 = parseFloat(y.solution[0].toFixed(2));
+  y2 = parseFloat(y.solution[1].toFixed(2));
+  y3 = parseFloat(y.solution[2].toFixed(2));
+  alert(y1);
+  
+  form.y1.value = y1;
+	form.y2.value = y2;
+	form.y3.value = y3;
+	
+}
+function V1(x)
+{
+	return ((1-Math.exp(-x)/(1-Math.exp(-10))));
+}
+
+function V2(x)
+{
+	return (x/10)
+}
+
+function V3(x)
+{
+	return (1/(1+Math.exp(-x/2)));
+}
+	
+function check(x, type)
+{
+	if(type == 1)
+	{
+		if(x ==l1 )
+			x = 0;
+		else if (x ==b1 )
+			x = 1;
+		else
+			x = V1(x);
+		return x;
+	}
+	else if(type == 2)
+	{
+		if(x ==l2 )
+			x = 0;
+		else if (x ==b2 )
+			x = 1;
+		else
+			x = x/10;
+		return x;
+	}
+	else if(type == 3)
+	{
+		if(x ==l3 )
+			x = 0;
+		else if (x ==b3 )
+			x = 1;
+		else
+			x = V3(x);
+		return x;
+	}
+	
+}	
+</script>
+<style type="text/css"></style></head>
+<body bgcolor="#ffffff" text="#000000" link="#0063A4" vlink="#990000" alink="#551A8B"> 
+<font face="verdana, arial, helvetica">
+<h1><center><font size="5" color="#DC143C">Computational Aspect of<br> Value Functions</font></center></h1>
+<p>
+  </p><p align="center"><font size="3" color="#000099" face="Arial, Helvetica, sans-serif">The column matrix is the prior probabilities regarding the state of nature, while the other is the row-wise reliability matrix.  </font></p>
+  <p align="center"><font face="Arial, Helvetica, sans-serif" size="3" color="#000099"><b><font color="#006633" size="4"><u>Enter the data and then click on "Compute"</u></font></b></font></p>
+
+<center>
+
+  <form name="form1" method="post" action="">
+    <p>&nbsp; 
+    <table width="170" border="1" bordercolor="#006633" height="96">
+      <tbody><tr align="center"> 
+        <td width="44"><font face="Arial, Helvetica, sans-serif" color="#000099"><b><font size="2">Value Functions</font> </b></font></td>
+        <td width="110"><font face="Arial, Helvetica, sans-serif" color="#000099"><b><font size="2">X range</font></b></font></td>
+      </tr>
+      <tr align="center"> 
+        <td colspan="2" nowrap=""> 
+           <font face="Arial, Helvetica, sans-serif" color="#000099"><b><font size="2">V1</font> </b></font>
+          <input type="text" name="low1" size="5" value="0">
+          <input type="text" name="high1" size="5" value="0">
+          <br>
+           <font face="Arial, Helvetica, sans-serif" color="#000099"><b><font size="2">V2</font> </b></font>
+           <input type="text" name="low2" size="5" value="0">
+          <input type="text" name="high2" size="5" value="0">
+		  <br>
+           <font face="Arial, Helvetica, sans-serif" color="#000099"><b><font size="2">V3</font> </b></font>
+           <input type="text" name="low3" size="5" value="0">
+          <input type="text" name="high3" size="5" value="0">
+        </td>
+      </tr>
+    </tbody></table>
+     
+</font></p><center><font color="#0000FF">
+
+</font></center><font color="#0000FF">  
+    </font>
+    
+	
+	
+	  <table width="146" border="1" bordercolor="#006633" height="95">
+      <tbody><tr align="center">
+        <td nowrap=""><font face="Arial, Helvetica, sans-serif" size="2" color="#000099">Indifference 1</font></td>
+      </tr>
+      <tr align="center">
+        <td nowrap="">
+		  <font face="Arial, Helvetica, sans-serif" color="#000099"><b><font size="2">Left Alternative</font> </b></font>		
+          <input type="text" name="V1_ind_left_1" size="8">
+          <input type="text" name="V2_ind_left_1" size="8">
+		  <input type="text" name="V3_ind_left_1" size="8">
+          <br>
+		  <font face="Arial, Helvetica, sans-serif" color="#000099"><b><font size="2">Right Alternative</font> </b></font>		
+          <input type="text" name="V1_ind_right_1" size="8">
+          <input type="text" name="V2_ind_right_1" size="8">
+		  <input type="text" name="V3_ind_right_1" size="8">
+        </td>
+		
+      </tr>
+    </tbody></table>
+	
+	<br>
+	<br>
+
+	<table width="146" border="1" bordercolor="#006633" height="95">
+      <tbody><tr align="center">
+        <td nowrap=""><font face="Arial, Helvetica, sans-serif" size="2" color="#000099">Indifference 2</font></td>
+      </tr>
+      <tr align="center">
+        <td nowrap="">
+		<font face="Arial, Helvetica, sans-serif" color="#000099"><b><font size="2">Left Alternative</font> </b></font>		
+          <input type="text" name="V1_ind_left_2" size="8">
+          <input type="text" name="V2_ind_left_2" size="8">
+		  <input type="text" name="V3_ind_left_2" size="8">
+          <br>
+		  <font face="Arial, Helvetica, sans-serif" color="#000099"><b><font size="2">Right Alternative</font> </b></font>		
+          <input type="text" name="V1_ind_right_2" size="8">
+          <input type="text" name="V2_ind_right_2" size="8">
+		  <input type="text" name="V3_ind_right_2" size="8">
+		  <br>
+		  <input type="button" value="Compute" onclick="Compute(this.form)" name="button">
+      <input type="reset" value="Reset"><br>
+	================<b><font face="Courier New, Courier, mono" color="#009933">RESULTS</font></b>================= 
+      	  <br>
+		 <font face="Arial, Helvetica, sans-serif" color="#000099"><b><font size="2">Weights</font> </b></font>		
+           <input type="text" name="y1" size="8">
+          <input type="text" name="y2" size="8">
+		  <input type="text" name="y3" size="8">
+        </td>
+		
+      </tr>
+    </tbody></table>
+	<br>
+	<br>
+	<table width="146" border="1" bordercolor="#006633" height="95">
+      <tbody><tr align="center">
+        <td nowrap=""><font face="Arial, Helvetica, sans-serif" size="2" color="#000099">Value function ranges </font></td>
+      </tr>
+      <tr align="center">
+        <td nowrap="">
+		  <font face="Arial, Helvetica, sans-serif" color="#000099"><b><font size="2">V1</font> </b></font>           
+          <input type="text" name="V1_low" size="8">
+          <input type="text" name="V1_high" size="8">
+          <br>
+		  <font face="Arial, Helvetica, sans-serif" color="#000099"><b><font size="2">V2</font> </b></font>
+		   <input type="text" name="V2_low" size="8">
+          <input type="text" name="V2_high" size="8">
+		  <br>
+		  <font face="Arial, Helvetica, sans-serif" color="#000099"><b><font size="2">V3</font> </b></font>
+		   <input type="text" name="V3_low" size="8">
+          <input type="text" name="V3_high" size="8">
+		  
+        </td>
+		
+      </tr>
+    </tbody></table>
+	
+	</form></center>
+<p>
+</p><p>
+  </p><p align="center"><font size="3" color="#009933" face="Arial, Helvetica, sans-serif">The results are the expected probability from the expert's prediction, and the probability matrix contains the column-wise posterior probabilities, respectively.</font></p>
+<p>
+    </p><p><font color="#0000CC">====================================================</font> 
+    </p>
+    
+  <p>&nbsp;</p>
+
+<center>
+Back to
+<br><a href="http://home.ubalt.edu/ntsbarsh/opre640a/partIX.htm" target="new">Probabilistic Modeling: Decision Analysis with Applications</a></center>
+<p>
+</p><hr>
+
+
+</font></body>
+<html>
